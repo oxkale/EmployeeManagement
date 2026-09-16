@@ -10,14 +10,13 @@ var builder = WebApplication.CreateBuilder(args);
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-var app = builder.Build();
 
-var jwtKey =
+/*ar jwtKey =
     builder.Configuration["Jwt:Key"]
     ?? throw new InvalidOperationException(
-        "JWT key is not configured.");
+        "JWT key is not configured.");*/
 
-builder.Services
+/*builder.Services
     .AddAuthentication(
         JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -40,7 +39,7 @@ builder.Services
                     new SymmetricSecurityKey(
                         Encoding.UTF8.GetBytes(jwtKey))
             };
-    });
+    });*/
 
     const string AngularPolicy = "AngularPolicy";
 
@@ -57,9 +56,11 @@ builder.Services.AddCors(options =>
         });
 });
 
+
+
 builder.Services.AddProblemDetails();
 
-
+var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

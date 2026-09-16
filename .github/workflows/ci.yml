@@ -30,6 +30,6 @@ jobs:
 
       - name: Run tests
         run: dotnet test --no-build
-
+      
       - name: Build Docker image
-        run: docker build -t employee-api:latest .
+        run: docker build -f ./Dockerfile -t employee-api:latest .
