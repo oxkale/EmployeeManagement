@@ -1,4 +1,4 @@
-name: .NET CI
+name: .NET CI/CD
 
 on:
   push:
@@ -9,14 +9,17 @@ on:
     branches:
       - main
 
-  env:
+env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
-
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
 
     steps:
       - name: Checkout code
@@ -35,7 +38,7 @@ jobs:
 
       - name: Run tests
         run: dotnet test --no-build
-      
+
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
         with:
