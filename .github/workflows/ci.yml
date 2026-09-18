@@ -59,3 +59,19 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+  test-self-hosted:
+    runs-on: self-hosted
+
+    steps:
+      - name: Show operating system
+        run: uname -a
+
+      - name: Show Docker version
+        run: docker --version
+
+      - name: Show runner information
+        run: |
+          echo "Runner: $RUNNER_NAME"
+          echo "OS: $RUNNER_OS"
+          echo "Architecture: $RUNNER_ARCH"
