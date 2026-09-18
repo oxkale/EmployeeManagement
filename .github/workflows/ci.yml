@@ -14,12 +14,15 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
-  build:
+
+  # ==========================================
+  # 1. BUILD AND TEST
+  # ==========================================
+  build-and-test:
     runs-on: ubuntu-latest
 
     permissions:
       contents: read
-      packages: write
 
     steps:
       - name: Checkout code
@@ -38,6 +41,22 @@ jobs:
 
       - name: Run tests
         run: dotnet test --no-build
+
+
+  # ==========================================
+  # 2. BUILD AND PUSH DOCKER IMAGE
+  # ==========================================
+  docker:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
@@ -60,18 +79,30 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
-  test-self-hosted:
+
+  # ==========================================
+  # 3. DEPLOY
+  # ==========================================
+  deploy:
     runs-on: self-hosted
+    needs: docker
 
     steps:
-      - name: Show operating system
-        run: uname -a
+      - name: Log in to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
 
-      - name: Show Docker version
-        run: docker --version
+      - name: Pull latest Docker image
+        run: docker pull ghcr.io/oxkale/employeemanagement:main
 
-      - name: Show runner information
+      - name: Stop old container
+        run: docker stop employee-api-ghcr || true
+
+      - name: Remove old container
+        run: docker rm employee-api-ghcr || true
+
+      - name: Start new container
         run: |
-          echo "Runner: $RUNNER_NAME"
-          echo "OS: $RUNNER_OS"
-          echo "Architecture: $RUNNER_ARCH"
+          docker run -d \
+            --name employee-api-ghcr \
+            -p 8081:8080 \
+            ghcr.io/oxkale/employeemanagement:main
